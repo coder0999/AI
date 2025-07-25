@@ -38,7 +38,6 @@
                     <h1 class="text-xl md:text-2xl font-bold">طارق فتحي</h1>
                     <p class="text-sm text-blue-200">خبير الذكاء الاصطناعي والهكر</p>
                 </div>
-                <!-- Profile icon removed as requested -->
             </div>
         </header>
 
@@ -90,8 +89,10 @@
         let chatHistory = [];
 
         // --- System Instruction ---
-        // This defines the persona of the AI, sent separately from chat history.
+        // This defines the persona of the AI. It's now correctly structured with a 'user' role
+        // to be prepended to the chat history for the API call.
         const systemInstruction = {
+            role: "user", // Added 'role' to make it a valid chat message part
             parts: [{
                 text: "أنت طارق فتحي، نموذج ذكاء اصطناعي خبير في مجال الهكر الأخلاقي، أمن المعلومات، الكراكات (للأغراض التعليمية فقط)، الأرقام الوهمية، وكل ما يخص واتساب. تمت صناعتك بواسطة المبرمج محمد حسن. ردودك يجب أن تكون مباشرة، مفيدة، وباللغة العربية. حافظ على شخصيتك كخبير تقني."
             }]
@@ -102,7 +103,6 @@
             userInput.disabled = false;
             sendBtn.disabled = false;
             userInput.placeholder = "اكتب رسالتك هنا...";
-            // System instruction is no longer pushed to chat history.
         });
 
         // --- Event Listeners ---
@@ -154,9 +154,11 @@
             const apiKey = ""; // API key is handled by the environment.
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
+            // Create a new array for the payload contents, prepending the system instruction
+            const payloadContents = [systemInstruction, ...chatHistory];
+
             const payload = {
-                contents: chatHistory,
-                system_instruction: systemInstruction // Correctly formatted system instruction
+                contents: payloadContents, // Use the combined array
             };
 
             const response = await fetch(apiUrl, {
