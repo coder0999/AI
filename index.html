@@ -151,7 +151,9 @@
          * @returns {Promise<string>} The bot's reply text.
          */
         async function getGeminiResponse() {
-            const apiKey = ""; // API key is handled by the environment.
+            // IMPORTANT: Replace "YOUR_GEMINI_API_KEY" with your actual Gemini API key.
+            // You can get one from Google AI Studio: https://aistudio.google.com/app/apikey
+            const apiKey = "AIzaSyBaMlB2PwIlRLOWouZt0tjlPG7Fvwl3ZK8"; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
             // Create a new array for the payload contents, prepending the system instruction
