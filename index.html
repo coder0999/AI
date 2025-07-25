@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طارق فتحي - ذكاء اصطناعي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        /* Custom scrollbar for a cleaner look */
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-window::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        #chat-window::-webkit-scrollbar-thumb {
+            background-color: #3b82f6; /* blue-500 */
+            border-radius: 20px;
+            border: 3px solid #f1f5f9; /* slate-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <!-- Main container adjusted for mobile-only full width -->
+    <div class="w-full mx-auto bg-white rounded-2xl shadow-2xl flex flex-col h-[90vh] max-h-[700px]">
+        
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 rounded-t-2xl shadow-md z-10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold">طارق فتحي</h1>
+                    <p class="text-sm text-blue-200">خبير الذكاء الاصطناعي والهكر</p>
+                </div>
+                <!-- Profile icon removed as requested -->
+            </div>
+        </header>
+
+        <!-- Chat Window -->
+        <main id="chat-window" class="flex-1 p-6 overflow-y-auto bg-slate-100 space-y-4">
+            <!-- Initial Bot Message -->
+            <div class="flex items-start gap-3 justify-start">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">TF</div>
+                <div class="bg-white p-3 rounded-lg rounded-tl-none shadow max-w-xs md:max-w-md">
+                    <p class="text-gray-800">مرحباً بك! أنا طارق فتحي، نموذج ذكاء اصطناعي متصل بـ Gemini. متخصص في مجال الهكر، الكراش، الأرقام الوهمية، وكل ما يخص واتساب. كيف يمكنني مساعدتك اليوم؟</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="p-4 text-sm text-gray-500 hidden">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">TF</div>
+                <span>طارق يكتب...</span>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="p-4 bg-white border-t border-gray-200 rounded-b-2xl">
+            <div class="flex items-center gap-2">
+                <input type="text" id="user-input" placeholder="اكتب رسالتك هنا..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition" disabled>
+                <button id="send-btn" class="bg-blue-600 text-white rounded-full p-3 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-transform transform hover:scale-105" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-3">تمت الصناعة بواسطة المبرمج محمد حسن</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // --- Chat History ---
+        // This will store the conversation history for context.
+        let chatHistory = [];
+
+        // --- System Instruction ---
+        // This defines the persona of the AI, sent separately from chat history.
+        const systemInstruction = {
+            parts: [{
+                text: "أنت طارق فتحي، نموذج ذكاء اصطناعي خبير في مجال الهكر الأخلاقي، أمن المعلومات، الكراكات (للأغراض التعليمية فقط)، الأرقام الوهمية، وكل ما يخص واتساب. تمت صناعتك بواسطة المبرمج محمد حسن. ردودك يجب أن تكون مباشرة، مفيدة، وباللغة العربية. حافظ على شخصيتك كخبير تقني."
+            }]
+        };
+        
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', () => {
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.placeholder = "اكتب رسالتك هنا...";
+            // System instruction is no longer pushed to chat history.
+        });
+
+        // --- Event Listeners ---
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // --- Main Functions ---
+
+        /**
+         * Handles sending the user's message and triggering the bot's response.
+         */
+        async function sendMessage() {
+            const messageText = userInput.value.trim();
+            if (messageText === '') return;
+
+            appendMessage(messageText, 'user');
+            userInput.value = '';
+            
+            // Add user message to history
+            chatHistory.push({ role: "user", parts: [{ text: messageText }] });
+
+            // Show typing indicator
+            typingIndicator.classList.remove('hidden');
+            
+            try {
+                const botReply = await getGeminiResponse();
+                appendMessage(botReply, 'bot');
+                // Add bot response to history
+                chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+
+            } catch (error) {
+                console.error("Error fetching Gemini response:", error);
+                appendMessage("عذراً، حدث خطأ أثناء محاولة الاتصال بالخادم. الرجاء المحاولة مرة أخرى.", 'bot');
+            } finally {
+                // Hide typing indicator
+                typingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Fetches a response from the Gemini API.
+         * @returns {Promise<string>} The bot's reply text.
+         */
+        async function getGeminiResponse() {
+            const apiKey = ""; // API key is handled by the environment.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: chatHistory,
+                system_instruction: systemInstruction // Correctly formatted system instruction
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                console.error("Payload sent:", JSON.stringify(payload, null, 2));
+                throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                // Handle cases where the response structure is unexpected or content is missing
+                console.warn("Unexpected API response structure:", result);
+                return "لم أتمكن من إنشاء رد. قد تكون هناك مشكلة في الـ API.";
+            }
+        }
+
+
+        /**
+         * Appends a message to the chat window.
+         * @param {string} text - The message content.
+         * @param {'user' | 'bot'} sender - The sender of the message.
+         */
+        function appendMessage(text, sender) {
+            const messageWrapper = document.createElement('div');
+            let messageHtml;
+
+            if (sender === 'user') {
+                messageWrapper.className = 'flex items-start gap-3 justify-end';
+                messageHtml = `
+                    <div class="bg-blue-600 text-white p-3 rounded-lg rounded-tr-none shadow max-w-xs md:max-w-md">
+                        <p>${text}</p>
+                    </div>
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">أنت</div>
+                `;
+            } else {
+                messageWrapper.className = 'flex items-start gap-3 justify-start';
+                messageHtml = `
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">TF</div>
+                    <div class="bg-white p-3 rounded-lg rounded-tl-none shadow max-w-xs md:max-w-md">
+                        <p class="text-gray-800">${text}</p>
+                    </div>
+                `;
+            }
+            
+            messageWrapper.innerHTML = messageHtml;
+            chatWindow.appendChild(messageWrapper);
+
+            // Scroll to the latest message
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
